@@ -1021,16 +1021,7 @@ function getParamCoder(coerceFunc: CoerceFunc, param: ParamType): Coder {
         return new CoderNull(coerceFunc, param.name);
     }
 
-    if (param.type === '') {
-        return new CoderNull(coerceFunc, param.name);
-    }
-
-    errors.throwError('invalid type', errors.INVALID_ARGUMENT, {
-        arg: 'type',
-        value: param.type
-    });
-
-    return null;
+    return new CoderNull(coerceFunc, param.name);
 }
 
 
