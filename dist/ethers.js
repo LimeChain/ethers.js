@@ -13257,14 +13257,7 @@ function getParamCoder(coerceFunc, param) {
     if (match) {
         return new CoderNull(coerceFunc, param.name);
     }
-    if (param.type === '') {
-        return new CoderNull(coerceFunc, param.name);
-    }
-    errors.throwError('invalid type', errors.INVALID_ARGUMENT, {
-        arg: 'type',
-        value: param.type
-    });
-    return null;
+    return new CoderNull(coerceFunc, param.name);
 }
 var AbiCoder = /** @class */ (function () {
     function AbiCoder(coerceFunc) {
