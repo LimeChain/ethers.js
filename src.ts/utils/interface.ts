@@ -150,7 +150,7 @@ class _FunctionDescription extends Description implements FunctionDescription {
     decode(data: string): any {
         try {
             return defaultAbiCoder.decode(this.outputs, arrayify(data));
-        } catch(error) {
+        } catch (error) {
             errors.throwError('invalid data for function output', errors.INVALID_ARGUMENT, {
                 arg: 'data',
                 errorArg: error.arg,
@@ -197,9 +197,9 @@ class _EventDescription extends Description implements EventDescription {
             if (arg == null) {
                 topics.push(null);
             } else if (param.type === 'string') {
-                 topics.push(id(arg));
+                topics.push(id(arg));
             } else if (param.type === 'bytes') {
-                 topics.push(keccak256(arg));
+                topics.push(keccak256(arg));
             } else if (param.type.indexOf('[') !== -1 || param.type.substring(0, 5) === 'tuple') {
                 errors.throwError('filtering with tuples or arrays not implemented yet; bug us on GitHub', errors.NOT_IMPLEMENTED, { operation: 'filter(array|tuple)' });
             } else {
@@ -223,11 +223,11 @@ class _EventDescription extends Description implements EventDescription {
         let inputIndexed: Array<ParamType> = [];
         let inputNonIndexed: Array<ParamType> = [];
         let inputDynamic: Array<boolean> = [];
-        this.inputs.forEach(function(param, index) {
+        this.inputs.forEach(function (param, index) {
 
             if (param.indexed) {
                 if (param.type === 'string' || param.type === 'bytes' || param.type.indexOf('[') >= 0 || param.type.substring(0, 5) === 'tuple') {
-                    inputIndexed.push({ type: 'bytes32', name: (param.name || '')});
+                    inputIndexed.push({ type: 'bytes32', name: (param.name || '') });
                     inputDynamic.push(true);
                 } else {
                     inputIndexed.push(param);
@@ -253,7 +253,7 @@ class _EventDescription extends Description implements EventDescription {
 
         var result: any = {};
         var nonIndexedIndex = 0, indexedIndex = 0;
-        this.inputs.forEach(function(input, index) {
+        this.inputs.forEach(function (input, index) {
             if (input.indexed) {
                 if (topics == null) {
                     result[index] = new _Indexed(null);
@@ -276,7 +276,7 @@ class _EventDescription extends Description implements EventDescription {
     }
 }
 
-class _TransactionDescription extends Description implements TransactionDescription{
+class _TransactionDescription extends Description implements TransactionDescription {
     readonly name: string;
     readonly args: Array<any>;
     readonly signature: string;
@@ -311,6 +311,13 @@ function addMethod(method: any): void {
             let signature = formatSignature(method).replace(/tuple/g, '');
             let sighash = id(signature).substring(0, 10);
 
+            let isConst = false;
+            if (method.constant != null) {
+                isConst = method.constant;
+            } else if (method.stateMutability != null) {
+                isConst = (method.stateMutability == "view" || method.stateMutability == "pure");
+            }
+
             let description = new _FunctionDescription({
                 inputs: method.inputs,
                 outputs: method.outputs,
@@ -318,7 +325,7 @@ function addMethod(method: any): void {
                 gas: method.gas,
 
                 payable: (method.payable == null || !!method.payable),
-                type: ((method.constant) ? 'call': 'transaction'),
+                type: ((isConst) ? 'call' : 'transaction'),
 
                 name: method.name,
                 signature: signature,
@@ -379,14 +386,14 @@ function addMethod(method: any): void {
 
 export class Interface {
     readonly abi: Array<EventFragment | FunctionFragment>;
-    readonly functions: { [ name: string ]: _FunctionDescription };
-    readonly events: { [ name: string ]: _EventDescription };
+    readonly functions: { [name: string]: _FunctionDescription };
+    readonly events: { [name: string]: _EventDescription };
     readonly deployFunction: _DeployDescription;
 
     constructor(abi: Array<string | ParamType> | string) {
         errors.checkNew(this, Interface);
 
-        if (typeof(abi) === 'string') {
+        if (typeof (abi) === 'string') {
             try {
                 abi = JSON.parse(abi);
             } catch (error) {
@@ -403,13 +410,13 @@ export class Interface {
             }
         }
 
-        defineReadOnly(this, 'functions', { });
-        defineReadOnly(this, 'events', { });
+        defineReadOnly(this, 'functions', {});
+        defineReadOnly(this, 'events', {});
 
         // Convert any supported ABI format into a standard ABI format
         let _abi: Array<EventFragment | FunctionFragment> = [];
         abi.forEach((fragment) => {
-            if (typeof(fragment) === 'string') {
+            if (typeof (fragment) === 'string') {
                 fragment = parseSignature(fragment);
             }
             // @TODO: We should probable do some validation; create abiCoder.formatSignature for checking
@@ -422,7 +429,7 @@ export class Interface {
 
         // If there wasn't a constructor, create the default constructor
         if (!this.deployFunction) {
-            addMethod.call(this, {type: 'constructor', inputs: []});
+            addMethod.call(this, { type: 'constructor', inputs: [] });
         }
 
         setType(this, 'Interface');
@@ -449,7 +456,7 @@ export class Interface {
         return null;
     }
 
-    parseLog(log: { topics: Array<string>, data: string}): _LogDescription {
+    parseLog(log: { topics: Array<string>, data: string }): _LogDescription {
         for (var name in this.events) {
             if (name.indexOf('(') === -1) { continue; }
             var event = this.events[name];
