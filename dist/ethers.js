@@ -14866,6 +14866,9 @@ function addMethod(method) {
         case 'fallback':
             // Nothing to do for fallback
             break;
+        case 'receive':
+            // Nothing to do for fallback
+            break;
         default:
             errors.warn('WARNING: unsupported ABI type - ' + method.type);
             break;
