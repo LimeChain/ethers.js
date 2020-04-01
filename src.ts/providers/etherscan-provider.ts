@@ -73,6 +73,7 @@ function checkLogTag(blockTag: string): number | "latest" {
     return parseInt(blockTag.substring(2), 16);
 }
 
+const defaultApiKey = "8FG3JMZ9USS4NTA6YKEKHINU56SEPPVBJR";
 
 export class EtherscanProvider extends BaseProvider{
     readonly baseUrl: string;
@@ -106,7 +107,7 @@ export class EtherscanProvider extends BaseProvider{
         }
 
         defineReadOnly(this, 'baseUrl', baseUrl);
-        defineReadOnly(this, 'apiKey', apiKey);
+        defineReadOnly(this, 'apiKey', apiKey || defaultApiKey);
     }
 
 
@@ -193,7 +194,7 @@ export class EtherscanProvider extends BaseProvider{
                     url += apiKey;
                     return get(url);
                 }
-                throw new Error('getBlock by blockHash not implmeneted');
+                return Promise.reject(new Error('getBlock by blockHash not implemeneted'));
 
             case 'getTransaction':
                 url += '/api?module=proxy&action=eth_getTransactionByHash&txhash=' + params.transactionHash;
@@ -212,7 +213,7 @@ export class EtherscanProvider extends BaseProvider{
                 url += '/api?module=proxy&action=eth_call' + transaction;
                 //url += '&tag=' + params.blockTag + apiKey;
                 if (params.blockTag !== 'latest') {
-                    throw new Error('EtherscanProvider does not support blockTag for call');
+                    return Promise.reject(new Error('EtherscanProvider does not support blockTag for call'));
                 }
                 url += apiKey;
                 return get(url);
